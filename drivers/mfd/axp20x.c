@@ -1009,6 +1009,7 @@ int axp20x_device_probe(struct axp20x_dev *axp20x)
 		return ret;
 	}
 
+	pm_power_off = 0;
 	if (!pm_power_off) {
 		axp20x_pm_power_off = axp20x;
 		pm_power_off = axp20x_power_off;

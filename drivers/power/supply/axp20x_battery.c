@@ -326,6 +326,42 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 		val->intval *= 1000;
 		break;
 
+	case POWER_SUPPLY_PROP_ENERGY_FULL:
+	case POWER_SUPPLY_PROP_ENERGY_NOW:
+		/* When no battery is present, return 0 */
+		ret = regmap_read(axp20x_batt->regmap, AXP20X_PWR_OP_MODE,
+				  &reg);
+		if (ret)
+			return ret;
+
+		if (!(reg & AXP20X_PWR_OP_BATT_PRESENT)) {
+			val->intval = 0;
+			return 0;
+		}
+
+		if(psp == POWER_SUPPLY_PROP_ENERGY_FULL) {
+			val->intval = 8000000;
+			return 0;
+		}
+
+		ret = regmap_read(axp20x_batt->regmap, AXP20X_FG_RES, &reg);
+		if (ret)
+			return ret;
+
+		if (axp20x_batt->data->has_fg_valid && !(reg & AXP22X_FG_VALID))
+			return -EINVAL;
+
+		val1 = reg & AXP209_FG_PERCENT;
+		if (val1 > 90)
+			val1= 80;
+		else if (val1 < 10)
+			val1 = 0;
+		else
+			val1 -= 10;
+
+		val->intval = val1 * 100000;
+		break;
+
 	default:
 		return -EINVAL;
 	}
@@ -497,6 +533,8 @@ static enum power_supply_property axp20x_battery_props[] = {
 	POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN,
 	POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN,
 	POWER_SUPPLY_PROP_CAPACITY,
+	POWER_SUPPLY_PROP_ENERGY_FULL,
+	POWER_SUPPLY_PROP_ENERGY_NOW,
 };
 
 static int axp20x_battery_prop_writeable(struct power_supply *psy,
@@ -641,6 +679,12 @@ static int axp20x_power_probe(struct platform_device *pdev)
 	 */
 	axp20x_get_constant_charge_current(axp20x_batt,
 					   &axp20x_batt->max_ccc);
+
+	regmap_update_bits(axp20x_batt->regmap, AXP20X_VBUS_IPSOUT_MGMT, 0x03, 0x03);
+	regmap_update_bits(axp20x_batt->regmap, AXP20X_OFF_CTRL, 0x08, 0x08);
+	regmap_update_bits(axp20x_batt->regmap, AXP20X_CHRG_CTRL2, 0x30, 0x20);
+	regmap_update_bits(axp20x_batt->regmap, AXP20X_PEK_KEY, 0x0f, 0x0b);
+	regmap_update_bits(axp20x_batt->regmap, AXP20X_GPIO0_CTRL, 0x07, 0x00);
 
 	return 0;
 }

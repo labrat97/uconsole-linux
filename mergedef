@@ -1,0 +1,16 @@
+#!/usr/bin/python3
+
+files = [ None, None, None ]
+pre_lines = []
+for i in range(len(files)):
+    files[i] = open(f'./arch/arm64/configs/bcm2711_defconfig.mrg.{i+1}', 'r')
+    for line in files[i].readlines():
+        prel = line.strip()
+        if len(prel) == 0: continue
+        pre_lines.append(prel)
+
+lines = set(pre_lines)
+for line in lines:
+    if line[0] == '#': continue
+    print(line)
+
