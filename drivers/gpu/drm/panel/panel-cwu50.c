@@ -260,9 +260,9 @@ static void cwu50_init_sequence(struct cwu50 *ctx)
 	dcs_write_seq(0xE6,0x02);
 	dcs_write_seq(0xE7,0x02);
 	dcs_write_seq(0x11);// SLPOUT
-	msleep (120);
+	msleep (150);
 	dcs_write_seq(0x29);// DSPON
-	msleep (20);
+	msleep (50);
 	dcs_write_seq(0x35,0x00);
 }
 
@@ -303,7 +303,7 @@ static int cwu50_unprepare(struct drm_panel *panel)
 		dev_err(ctx->dev, "failed to enter sleep mode (%d)\n", ret);
 		return ret;
 	}
-	msleep(120);
+	msleep(150);
 
 	gpiod_set_value_cansleep(ctx->reset_gpio, 0);
 	msleep(5);
@@ -324,9 +324,11 @@ static int cwu50_prepare(struct drm_panel *panel)
 		return 0;
 
 	gpiod_set_value_cansleep(ctx->reset_gpio, 0);
-	msleep(20);
+	msleep(50);
 	gpiod_set_value_cansleep(ctx->reset_gpio, 1);
-	msleep(240);
+	msleep(150);
+	gpiod_set_value_cansleep(ctx->reset_gpio, 0); // This might be wrong
+	msleep(50);
 
 	/* Enabe tearing mode: send TE (tearing effect) at VBLANK */
 	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
@@ -343,14 +345,14 @@ static int cwu50_prepare(struct drm_panel *panel)
 		dev_err(ctx->dev, "failed to exit sleep mode (%d)\n", ret);
 		return ret;
 	}
-	msleep(120);
+	msleep(150);
 
 	ret = mipi_dsi_dcs_set_display_on(dsi);
 	if (ret) {
 		dev_err(ctx->dev, "failed to turn display on (%d)\n", ret);
 		return ret;
 	}
-	msleep(20);
+	msleep(50);
 
 	ctx->prepared = true;
 
