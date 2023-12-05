@@ -26,7 +26,7 @@ Build status for rpi-6.1.y:
 First, build the kernel and copy to the boot partition.
 
 ```
-sudo apt install git vc bison flex libssl-dev make
+sudo apt install git bc bison flex libssl-dev make
 git clone https://github.com/labrat97/uconsole-linux.git
 export KERNEL=kernel8
 make bcm2711_uc_defconfig
