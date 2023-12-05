@@ -1285,15 +1285,10 @@ static ssize_t vc4_dsi_host_transfer(struct mipi_dsi_host *host,
 	DSI_PORT_WRITE(TXPKT1H, pkth);
 	DSI_PORT_WRITE(TXPKT1C, pktc);
 
-	if (!wait_for_completion_timeout(&dsi->xfer_completion,
-					 msecs_to_jiffies(1000))) {
-		dev_err(&dsi->pdev->dev, "transfer interrupt wait timeout");
-		dev_err(&dsi->pdev->dev, "instat: 0x%08x\n",
-			DSI_PORT_READ(INT_STAT));
-		ret = -ETIMEDOUT;
-	} else {
-		ret = dsi->xfer_result;
-	}
+	while (!wait_for_completion_timeout(&dsi->xfer_completion,
+					 msecs_to_jiffies(1000)));
+	ret = dsi->xfer_result;
+	
 
 	DSI_PORT_WRITE(INT_EN, DSI_PORT_BIT(INTERRUPTS_ALWAYS_ENABLED));
 

@@ -327,8 +327,6 @@ static int cwu50_prepare(struct drm_panel *panel)
 	msleep(50);
 	gpiod_set_value_cansleep(ctx->reset_gpio, 1);
 	msleep(150);
-	gpiod_set_value_cansleep(ctx->reset_gpio, 0); // This might be wrong
-	msleep(50);
 
 	/* Enabe tearing mode: send TE (tearing effect) at VBLANK */
 	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
