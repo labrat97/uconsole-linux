@@ -1712,7 +1712,7 @@ static int vc4_dsi_bind(struct device *dev, struct device *master, void *data)
 	 */
 	list_splice_init(&dsi->encoder->bridge_chain, &dsi->bridge_chain);
 
-	vc4_debugfs_add_regset32(drm->primary, dsi->variant->debugfs_name, &dsi->regset);
+	vc4_debugfs_add_regset32(drm->render, dsi->variant->debugfs_name, &dsi->regset);
 
 	pm_runtime_enable(dev);
 
