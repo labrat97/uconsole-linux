@@ -260,9 +260,9 @@ static void cwu50_init_sequence(struct cwu50 *ctx)
 	dcs_write_seq(0xE6,0x02);
 	dcs_write_seq(0xE7,0x02);
 	dcs_write_seq(0x11);// SLPOUT
-	msleep (150);
+	msleep (130);
 	dcs_write_seq(0x29);// DSPON
-	msleep (50);
+	msleep (30);
 	dcs_write_seq(0x35,0x00);
 }
 
@@ -324,18 +324,11 @@ static int cwu50_prepare(struct drm_panel *panel)
 		return 0;
 
 	gpiod_set_value_cansleep(ctx->reset_gpio, 0);
-	msleep(50);
+	msleep(30);
 	gpiod_set_value_cansleep(ctx->reset_gpio, 1);
-	msleep(150);
+	msleep(130);
 
-	/* Enabe tearing mode: send TE (tearing effect) at VBLANK */
-	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
-	if (ret) {
-		dev_err(ctx->dev, "failed to enable vblank TE (%d)\n", ret);
-		return ret;
-	}
 	/* Exit sleep mode and power on */
-
 	cwu50_init_sequence(ctx);
 
 	ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
@@ -343,7 +336,7 @@ static int cwu50_prepare(struct drm_panel *panel)
 		dev_err(ctx->dev, "failed to exit sleep mode (%d)\n", ret);
 		return ret;
 	}
-	msleep(150);
+	msleep(130);
 
 	ret = mipi_dsi_dcs_set_display_on(dsi);
 	if (ret) {
@@ -351,6 +344,13 @@ static int cwu50_prepare(struct drm_panel *panel)
 		return ret;
 	}
 	msleep(50);
+
+	/* Enabe tearing mode: send TE (tearing effect) at VBLANK */
+	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
+	if (ret) {
+		dev_err(ctx->dev, "failed to enable vblank TE (%d)\n", ret);
+		return ret;
+	}
 
 	ctx->prepared = true;
 
