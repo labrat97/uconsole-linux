@@ -737,7 +737,7 @@ static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 			 (dsi->lanes > 1 ? DSI1_STAT_PHY_D1_STOP : 0) |
 			 (dsi->lanes > 2 ? DSI1_STAT_PHY_D2_STOP : 0) |
 			 (dsi->lanes > 3 ? DSI1_STAT_PHY_D3_STOP : 0));
-	int ret;
+	int ret, i = 0;
 	bool ulps_currently_enabled = (DSI_PORT_READ(PHY_AFEC0) &
 				       DSI_PORT_BIT(PHY_AFEC0_LATCH_ULPS));
 
@@ -765,14 +765,13 @@ static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 
 	DSI_PORT_WRITE(STAT, stat_stop);
 	DSI_PORT_WRITE(PHYC, DSI_PORT_READ(PHYC) & ~phyc_ulps);
-	ret = wait_for((DSI_PORT_READ(STAT) & stat_stop) == stat_stop, 200);
-	if (ret) {
-		dev_warn(&dsi->pdev->dev,
-			 "Timeout waiting for DSI STOP entry: STAT 0x%08x",
-			 DSI_PORT_READ(STAT));
-		DSI_PORT_WRITE(PHYC, DSI_PORT_READ(PHYC) & ~phyc_ulps);
-		return;
-	}
+	while(wait_for((DSI_PORT_READ(STAT) & stat_stop) == stat_stop, 200)){
+		if(i++ == 10) {
+			DSI_PORT_WRITE(PHYC, DSI_PORT_READ(PHYC) & ~phyc_ulps);
+			break;
+		}
+	
+	return;
 }
 
 static u32
@@ -1712,7 +1711,8 @@ static int vc4_dsi_bind(struct device *dev, struct device *master, void *data)
 	 */
 	list_splice_init(&dsi->encoder->bridge_chain, &dsi->bridge_chain);
 
-	vc4_debugfs_add_regset32(drm->render, dsi->variant->debugfs_name, &dsi->regset);
+	// Might not need this at all.
+	// vc4_debugfs_add_regset32(drm->render, dsi->variant->debugfs_name, &dsi->regset);
 
 	pm_runtime_enable(dev);
 
