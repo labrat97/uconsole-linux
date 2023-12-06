@@ -721,6 +721,8 @@ static void vc4_dsi_latch_ulps(struct vc4_dsi *dsi, bool latch)
 /* Enters or exits Ultra Low Power State. */
 static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 {
+	int i = 0;
+	int ret;
 	bool non_continuous = dsi->mode_flags & MIPI_DSI_CLOCK_NON_CONTINUOUS;
 	u32 phyc_ulps = ((non_continuous ? DSI_PORT_BIT(PHYC_CLANE_ULPS) : 0) |
 			 DSI_PHYC_DLANE0_ULPS |
@@ -737,7 +739,6 @@ static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 			 (dsi->lanes > 1 ? DSI1_STAT_PHY_D1_STOP : 0) |
 			 (dsi->lanes > 2 ? DSI1_STAT_PHY_D2_STOP : 0) |
 			 (dsi->lanes > 3 ? DSI1_STAT_PHY_D3_STOP : 0));
-	int ret;
 	bool ulps_currently_enabled = (DSI_PORT_READ(PHY_AFEC0) &
 				       DSI_PORT_BIT(PHY_AFEC0_LATCH_ULPS));
 
@@ -763,7 +764,6 @@ static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 	 */
 	vc4_dsi_latch_ulps(dsi, ulps);
 
-	int i = 0;
 	DSI_PORT_WRITE(STAT, stat_stop);
 	DSI_PORT_WRITE(PHYC, DSI_PORT_READ(PHYC) & ~phyc_ulps);
 	while(wait_for((DSI_PORT_READ(STAT) & stat_stop) == stat_stop, 200)){
