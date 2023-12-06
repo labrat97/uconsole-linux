@@ -771,6 +771,7 @@ static void vc4_dsi_ulps(struct vc4_dsi *dsi, bool ulps)
 			DSI_PORT_WRITE(PHYC, DSI_PORT_READ(PHYC) & ~phyc_ulps);
 			break;
 		}
+	}
 	
 	return;
 }
