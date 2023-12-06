@@ -269,8 +269,6 @@ static void cwu50_init_sequence(struct cwu50 *ctx)
 static int cwu50_disable(struct drm_panel *panel)
 {
 	struct cwu50 *ctx = panel_to_cwu50(panel);
-	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
-	int ret;
 
 	if (!ctx->enabled)
 		return 0;
@@ -288,7 +286,6 @@ static int cwu50_unprepare(struct drm_panel *panel)
 	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
 	int ret;
 
-#if 0
 	if (!ctx->prepared)
 		return 0;
 
@@ -309,7 +306,6 @@ static int cwu50_unprepare(struct drm_panel *panel)
 	msleep(5);
 
 	ctx->prepared = false;
-#endif
 
 	return 0;
 }
@@ -360,8 +356,6 @@ static int cwu50_prepare(struct drm_panel *panel)
 static int cwu50_enable(struct drm_panel *panel)
 {
 	struct cwu50 *ctx = panel_to_cwu50(panel);
-	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
-	int ret;
 
 	if (ctx->enabled)
 		return 0;
